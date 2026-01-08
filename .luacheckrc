@@ -1,5 +1,5 @@
 unused_args = false
-max_line_length = 300  -- TODO: fix line lengths
+max_line_length = 300 -- TODO: fix line lengths
 --std = "luanti+max"
 
 globals = {
@@ -11,7 +11,8 @@ read_globals = {
 	-- Builtin
 	"core",
 	"minetest",
-	table = {fields = {"copy"}},
+	table = { fields = { "copy" } },
+	math = { fields = { "round" } },
 	"vector",
 	"ItemStack",
 	"DIR_DELIM",
@@ -27,4 +28,3 @@ read_globals = {
 exclude_files = {
 	"**/spec/**",
 }
-

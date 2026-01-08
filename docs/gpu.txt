@@ -170,3 +170,144 @@ y [integer 1-64]: The Y position of the top of the image.
 xsize [integer 1-64]: The width of the image. Must be the same as the original image or the image will be severely distorted.
 ysize [integer 1-64]: The height of the image. Should be the same as the original image.
 data [string]: The packed image to load.
+
+Command: fakeshader
+-------------------
+
+Allows you to run code that executes for every pixel in a buffer. It isn't a "real" shader because it isn't ran on the GPU and it is ran only on a CPU single thread.
+
+Parameters:
+buffer [integer 0-7]: The buffer to run the shader on
+code [string, lua code]: The code of the shader
+
+The code that you write gets called for each pixel, and has to return the r, g, b values (integers between 0 and 255)
+
+In order to prevent abuse and lag, the shader code has some limitations:
+- The shader can only run for 200*64*64 instructions (this is more than the mesecons luacontroller, but you are not allowed to use the laggy string operation instructions, and in practice it's less)
+- Declaring strings is not allowed
+   - More specifically, you cannot have in your code: " ' [[ [<any amount of equal signs>[
+   - **You also cannot have those characters in comments, and you cannot declare multi line comments**
+   - If possible, try minimizing the amount of comments, so you don't accidentally run into this restriction
+   - This was done because it would be difficult to limit string concatination and declaring long strings if they were allowed.
+- The maximum length of your code is 1000 characters
+
+The environment of shaders (the only things avaliable in shader code):
+- math: All standard math functions as documented in the lua manual, except math.randomseed
+- xsize: The width of the buffer
+- ysize: the height of the buffer
+- x: The current x coordinate of the pixel that is being processed
+- y: The current y coordinate of the pixel that is being processed
+- r: The red value of the current pixel being processed
+- g: The green value of the current pixel being processed
+- b: The blue value of the current pixel being processed
+- get_color(x, y): Allows you to get a color from the buffer, returns 3 values: r, g, b
+
+If the shader code is invalid or throws an error, the digilines GPU will send the error message to digilines, under the channel that it has been configured with.
+
+
+Shader code examples (inside "```"):
+
+Gradient:
+```
+return (x/xsize)*255, (y/ysize)*255, 0
+```
+
+Grid:
+```
+return 255*math.sin(x/2), 255*math.sin(y/2), 0
+```
+
+Noise:
+```
+return math.random()*255, math.random()*255, math.random()*255
+```
+
+Classic showcase of how RGB works:
+```
+local radius = 16 -- radius, not named "r" because that would shadow the "r" global
+local dist = 10 -- distance between circles
+local cX, cY = x-(xsize/2), y-(ysize/2) -- center X, center Y
+local r2 = radius^2
+
+local red_circle   = r2 - (cX^2+(cY+dist)^2) -- thanks pythagoras
+local green_circle = r2 - ((cX+dist)^2+cY^2)
+local blue_circle  = r2 - ((cX-dist)^2+cY^2)
+
+-- make them solid
+red_circle, green_circle, blue_circle =
+ math.min(1, red_circle)*255,
+ math.min(1, green_circle)*255,
+ math.min(1, blue_circle)*255
+
+return red_circle, green_circle, blue_circle
+```
+
+I am pretty sure you could also run the Conway's Game of Life with this, but that is an excercise for the viewer.
+
+Command: convolutionmatrix
+-------------------------
+See https://en.wikipedia.org/wiki/Kernel_(image_processing)
+
+Allows you to blur/sharpen/edge detection or do other fun stuff on an image using some numbers in a table. Feel free to experiment.
+
+Parameters:
+buffer [integer 0-7]: The buffer to perform the operation on
+matrix [nested 3x3 or 5x5 table]: The convolution matrix/image kernel
+
+Example:
+{
+   command = "convolutionmatrix",
+   buffer = 0,
+   matrix = { -- edge detection
+      { 0, 1 , 0},
+      { 1, -4, 1},
+      { 0, 1 , 0}
+   }
+}
+
+Command: transform
+------------------
+Allows you to rotate/shear/scale/move an area of a buffer.
+
+See:
+https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
+https://en.wikipedia.org/wiki/Rotation_matrix
+
+Parameters:
+buffer [integer 0-7]: The buffer to perform the operation on.
+x1 [integer 1-64]: x1, y1, x2, y2 will be the region that the transform will operate on.
+y1 [integer 1-64]
+x2 [integer 1-64]
+y2 [integer 1-64]
+matrix [2x2 nested table or 3x3 nested table]: The transformation/affine matrix, feel free to experiment
+center_x [number] - The X coordinate for the center of the transformation (for example the center of a rotation), can be any number, doesn't even need to be on the buffer
+center_y [number] - The Y coordinate for the center of the transformation (for example the center of a rotation), can be any number, doesn't even need to be on the buffer
+interpolation [boolean, default: true]: If true or unspecified, uses bilinear interpolation, if false it uses nearest neighbor
+
+Examples:
+{
+   command = "transform",
+   buffer = 0,
+   x1 = 0, y1 = 0, x2 = 64, y2 = 64,
+   center_x = 32, center_y = 32,
+   matrix = {
+      {1,0.5,0},   -- changes to X coordinate ( when it is {1,0,0} nothing changes, in this case it will shear a bit)
+      {0,1,0},     -- changes to Y coordinate ( when it is {0,1,0} nothing changes)
+      {0,0,1}      -- changes to perspective (if you change this then it isn't an affine transform) (when it is {0,0,1} nothing changes)
+   },
+   interpolation = false
+}
+
+
+local angle = math.pi/4 -- 45 degrees
+{
+   command = "transform",
+   buffer = 0,
+   x1 = 0, y1 = 0, x2 = 64, y2 = 64,
+   center_x = 32, center_y = 32,
+   matrix = { -- rotates by the angle
+      {math.cos(angle), -math.sin(angle)},
+      {math.sin(angle), math.cos(angle},
+   },
+   interpolation = false,
+}
