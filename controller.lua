@@ -288,7 +288,7 @@ core.register_entity("digistuff:controller_entity", {
 		visual = "sprite",
 		pointable = false,
 		collisionbox = { 0, 0, 0, 0, 0, 0 },
-		textures = { "digistuff_transparent.png" },
+		textures = { "blank.png" },
 	},
 	_is_gamecontroller = true,
 })
