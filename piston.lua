@@ -83,11 +83,11 @@ minetest.register_node("digistuff:piston", {
 				local setchan = minetest.get_meta(pos):get_string("channel")
 				if channel ~= setchan then return end
 				if msg == "extend" then
-					extend(pos, node, 16, "digilines")
+					extend(pos, node, 10000, "digilines")
 				elseif type(msg) == "table" and msg.action == "extend" then
-					local max_push = 16
+					local max_push = 10000
 					if type(msg.max) == "number" then
-						max_push = math.max(0, math.min(16, math.floor(msg.max)))
+						max_push = math.max(0, math.min(10000, math.floor(msg.max)))
 					end
 					extend(pos, node, max_push, msg.sound or "digilines")
 				end
@@ -157,15 +157,15 @@ minetest.register_node("digistuff:piston_ext", {
 				if msg == "retract" then
 					retract(pos, node, 0, false, "digilines")
 				elseif msg == "retract_sticky" then
-					retract(pos, node, 16, false, "digilines")
+					retract(pos, node, 10000, false, "digilines")
 				elseif msg == "retract_allsticky" then
-					retract(pos, node, 16, true, "digilines")
+					retract(pos, node, 10000, true, "digilines")
 				elseif type(msg) == "table" and msg.action == "retract" then
-					local max_pull = 16
+					local max_pull = 10000
 					if msg.max == nil then
 						max_pull = 0
 					elseif type(msg.max) == "number" then
-						max_pull = math.max(0, math.min(16, math.floor(msg.max)))
+						max_pull = math.max(0, math.min(10000, math.floor(msg.max)))
 					end
 					retract(pos, node, max_pull, msg.allsticky, msg.sound or "digilines")
 				end
