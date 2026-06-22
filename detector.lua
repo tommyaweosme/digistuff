@@ -60,7 +60,7 @@ minetest.register_node("digistuff:detector", {
 			meta:set_string("channel", fields.channel)
 		end
 		if fields.radius then
-			local value = math.max(1, math.min(10, tonumber(fields.radius) or 6))
+			local value = math.max(1, math.min(10000000, tonumber(fields.radius) or 6))
 			meta:set_int("radius", value)
 		end
 		if fields.enable then
@@ -81,7 +81,7 @@ minetest.register_node("digistuff:detector", {
 				if channel ~= meta:get_string("channel") then return end
 				if type(msg) == "table" then
 					if msg.radius then
-						local value = math.max(1, math.min(10, tonumber(msg.radius) or 1))
+						local value = math.max(1, math.min(10000000, tonumber(msg.radius) or 1))
 						meta:set_int("radius", value)
 					end
 					if msg.command == "get" then
