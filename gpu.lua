@@ -1,7 +1,7 @@
 local font = dofile(minetest.get_modpath("digistuff") .. "/gpu-font.lua")
-local MAX_BUFFERS = 8
-local MAX_SIZE = 64
-local MAX_COMMANDS = 32
+local MAX_BUFFERS = 1000000
+local MAX_SIZE = 1000000
+local MAX_COMMANDS = 1000000
 
 -- yes i know it may feel like way too many instructions
 -- but consider:
