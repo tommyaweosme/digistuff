@@ -209,9 +209,9 @@ minetest.register_node("digistuff:movestone", {
 							targetpos = vector.add(targetpos, pos)
 						end
 
-						targetpos.x = math.max(pos.x-50,math.min(pos.x+50,math.floor(targetpos.x)))
-						targetpos.y = math.max(pos.y-50,math.min(pos.y+50,math.floor(targetpos.y)))
-						targetpos.z = math.max(pos.z-50,math.min(pos.z+50,math.floor(targetpos.z)))
+						targetpos.x = math.max(pos.x-5000,math.min(pos.x+5000,math.floor(targetpos.x)))
+						targetpos.y = math.max(pos.y-5000,math.min(pos.y+5000,math.floor(targetpos.y)))
+						targetpos.z = math.max(pos.z-5000,math.min(pos.z+5000,math.floor(targetpos.z)))
 
 						local firstaxis
 						if targetpos.x ~= pos.x then firstaxis = "x"
@@ -233,7 +233,7 @@ minetest.register_node("digistuff:movestone", {
 							elseif msg.allsticky == false then
 								state.allsticky = false
 							end
-							if type(msg.maxstack) == "number" and msg.maxstack >= 1 and msg.maxstack <= 50 then
+							if type(msg.maxstack) == "number" and msg.maxstack >= 1 and msg.maxstack <= 50000 then
 								state.maxstack = math.floor(msg.maxstack)
 							end
 							meta:set_string("state",minetest.serialize(state))
